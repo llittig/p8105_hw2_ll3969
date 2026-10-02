@@ -1,0 +1,63 @@
+---
+title: "p8105_hw2_LL3969"
+author: "Lauren Littig"
+date: "2026-10-02"
+output: github_document
+---
+
+# Problem 1
+
+Load packages, import/clean data, select needed variables, convert entry variable from character to logical:
+
+```{r}
+library(tidyverse)
+subway_df =
+  read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv") |>
+  janitor::clean_names()
+
+names(subway_df)
+
+subway_df =
+  select(subway_df, line:entry, vending, ada) |>
+  mutate(
+    entry =
+      case_match(
+        entry,
+        "YES" ~ TRUE,
+        "NO" ~ FALSE
+      )
+  )
+```
+
+`subway_df` contains the variables `r paste(names(subway_df))`. To get my dataframe into the current format, I first cleaned the data, selected needed variables, and converted the entry variable from character to logical. The current dataframe contains `r nrow(subway_df)` observations and `r ncol(subway_df)` variables. These data are NOT tidy because (something about route)....
+
+How many distinct stations are there?
+
+```{r}
+subway_df |>
+  distinct(station_name, line) |>
+  nrow()
+```
+
+How many stations are ADA compliant?
+
+```{r}
+subway_df |> 
+  filter(ada == TRUE) |>
+  distinct(station_name, line) |>
+  nrow()
+```
+
+84 stations are ADA compliant.
+
+What proportion of station entrances / exits without vending allow entrance?
+
+```{r}
+subway_df |>
+  filter(vending == "NO") |> 
+  summarize(
+    proportion_entry = mean(entry, na.rm = TRUE)
+  )
+```
+
+37.7% of station entrances / exits without vending allow entrance.
